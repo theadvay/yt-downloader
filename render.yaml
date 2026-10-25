@@ -1,0 +1,25 @@
+# Render Blueprint for yt-downloader.
+#
+# Deploy: Render Dashboard -> New -> Blueprint -> pick this repo -> Deploy.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: yt-downloader
+    runtime: docker
+    plan: free
+    region: singapore          # closest to India; other options: oregon, frankfurt
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      # Optional: cloud IPs often hit YouTube's "confirm you're not a bot" check.
+      # Upload a Netscape-format cookies.txt as a Render Secret File, then
+      # uncomment these lines and point the path at its mount location.
+      # - key: YTDLP_COOKIES
+      #   value: /etc/secrets/cookies.txt

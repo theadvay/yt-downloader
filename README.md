@@ -65,6 +65,50 @@ docker run --rm -p 5000:5000 yt-downloader
 
 The image bundles ffmpeg, so everything works out of the box.
 
+## Deploy it
+
+The bundled `Dockerfile` (with ffmpeg) runs as-is on any container host.
+
+### Render — recommended, genuinely free
+
+This repo includes a `render.yaml` Blueprint, so it's a one-click deploy:
+
+1. In the [Render Dashboard](https://dashboard.render.com), click **New → Blueprint**.
+2. Connect this repo and click **Deploy Blueprint**.
+3. Render builds the Dockerfile and gives you a `https://<name>.onrender.com` URL.
+
+Free-plan caveats worth knowing up front:
+
+- The service **spins down after 15 minutes** without traffic and takes about a
+  minute to wake on the next request.
+- Free instances have **512 MB RAM** — fine for 720p/1080p, but a 4K merge can
+  run out of memory.
+- Each workspace gets **750 instance hours/month** (a month is ~744 h, so one
+  always-on service just fits) and **5 GB/month of outbound bandwidth**. Video
+  downloads count against that, so expect roughly 25–50 downloads a month.
+
+### Railway
+
+Railway builds the same Dockerfile with no extra config:
+
+1. [railway.com](https://railway.com) → **New Project → Deploy from GitHub repo**.
+2. Pick this repo — Railway detects the Dockerfile and builds it.
+
+Railway's free tier is a one-time **$5 credit for 30 days**; after that the Free
+plan gives **$1/month**, which is not enough to keep this app running 24/7. The
+**Hobby plan ($5/month)** is the realistic choice if you want it always awake.
+
+### On a cloud host you'll probably need cookies
+
+Render, Railway, Vercel and friends all use datacenter IPs, and YouTube tends to
+answer those with *"Sign in to confirm you're not a bot."* Fix it by supplying
+cookies. Note that `YTDLP_COOKIES_FROM_BROWSER` only works when the app runs on
+**your own machine** — on a server, use an exported `cookies.txt`:
+
+- On Render, add a **Secret File** named `cookies.txt`, then set the
+  `YTDLP_COOKIES` env var to its mount path (`/etc/secrets/cookies.txt`).
+- Cookies expire, so plan to refresh that file every few weeks.
+
 ## Configuration
 
 The app reads a few environment variables:
@@ -113,6 +157,8 @@ yt-downloader/
 ├── tests/test_downloader.py   # unit tests (network mocked)
 ├── requirements.txt
 ├── Dockerfile
+├── render.yaml                # one-click Render Blueprint
+├── .dockerignore
 └── .github/workflows/ci.yml
 ```
 
