@@ -14,7 +14,6 @@ import shutil
 import subprocess
 import tempfile
 from dataclasses import dataclass
-from typing import Optional
 from urllib.parse import urlparse
 
 import yt_dlp
@@ -42,9 +41,6 @@ QUALITY_FORMATS = {
     "480": "bestvideo[height<=480]+bestaudio/best[height<=480]",
     "360": "bestvideo[height<=360]+bestaudio/best[height<=360]",
 }
-
-# Audio formats that yt-dlp can produce without ffmpeg re-encoding.
-NATIVE_AUDIO_FORMATS = {"m4a", "opus", "webm"}
 
 _ANSI = re.compile(r"\x1b\[[0-9;]*m")
 
@@ -112,8 +108,8 @@ _HINTS = (
     ),
     (
         ("no supported javascript runtime", "javascript runtime"),
-        "yt-dlp needs an external JS runtime (Deno or Node 22+). The Docker "
-        "image installs one via 'yt-dlp[default,deno]'.",
+        'yt-dlp needs an external JS runtime (Deno or Node 22+). Install one '
+        'with: pip install -U "yt-dlp[default,deno]"',
     ),
 )
 
@@ -237,14 +233,13 @@ def download(
     )
 
     if audio_only:
-        if audio_format in NATIVE_AUDIO_FORMATS or not has_ffmpeg:
-            opts["format"] = "bestaudio/best"
-            if has_ffmpeg and audio_format in ("mp3", "wav", "aac"):
-                opts["postprocessors"] = [
-                    {"key": "FFmpegExtractAudio", "preferredcodec": audio_format}
-                ]
-        else:
-            opts["format"] = "bestaudio/best"
+        # m4a is usually served natively; mp3 and wav need ffmpeg to re-encode.
+        opts["format"] = (
+            "bestaudio[ext=m4a]/bestaudio/best"
+            if audio_format == "m4a"
+            else "bestaudio/best"
+        )
+        if has_ffmpeg and audio_format in ("mp3", "wav"):
             opts["postprocessors"] = [
                 {"key": "FFmpegExtractAudio", "preferredcodec": audio_format}
             ]
