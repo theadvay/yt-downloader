@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>yt-downloader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⬇️</text></svg>" />
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v12" />
+          <path d="m7 11 5 5 5-5" />
+          <path d="M5 21h14" />
+        </svg>
+      </div>
+      <h1>yt-downloader</h1>
+      <p class="sub">Paste a YouTube link, pick a quality, download. That's it.</p>
+    </header>
+
+    <section class="card">
+      <form id="url-form" class="url-row" autocomplete="off">
+        <input
+          id="url"
+          type="text"
+          placeholder="https://www.youtube.com/watch?v=..."
+          spellcheck="false"
+          aria-label="YouTube URL"
+          required
+        />
+        <button id="fetch-btn" type="submit" class="btn primary">Fetch</button>
+      </form>
+
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+
+      <div id="preview" class="preview hidden">
+        <div class="thumb-wrap">
+          <img id="thumb" alt="Video thumbnail" />
+          <span id="duration" class="duration"></span>
+        </div>
+        <div class="meta">
+          <h2 id="title"></h2>
+          <p id="channel" class="channel"></p>
+        </div>
+      </div>
+
+      <div id="options" class="options hidden">
+        <div class="opt-group">
+          <label for="quality">Quality</label>
+          <select id="quality">
+            <option value="best">Best available</option>
+            <option value="2160">2160p (4K)</option>
+            <option value="1440">1440p (2K)</option>
+            <option value="1080" selected>1080p</option>
+            <option value="720">720p</option>
+            <option value="480">480p</option>
+            <option value="360">360p</option>
+          </select>
+        </div>
+
+        <div class="opt-group">
+          <label class="switch">
+            <input type="checkbox" id="audio-only" />
+            <span class="slider"></span>
+            <span class="switch-label">Audio only</span>
+          </label>
+        </div>
+
+        <div class="opt-group" id="audio-format-group" hidden>
+          <label for="audio-format">Audio format</label>
+          <select id="audio-format">
+            <option value="mp3" selected>MP3</option>
+            <option value="m4a">M4A</option>
+            <option value="wav">WAV</option>
+          </select>
+        </div>
+      </div>
+
+      <button id="download-btn" class="btn download hidden" disabled>Download</button>
+
+      {% if not ffmpeg %}
+      <p class="hint">
+        Heads up: <strong>ffmpeg</strong> was not found on this machine, so the app
+        will fall back to pre-merged single-file formats (usually capped at 720p)
+        and audio conversion is limited. Install ffmpeg to unlock 1080p/4K merging
+        and MP3/WAV conversion.
+      </p>
+      {% endif %}
+    </section>
+
+    <footer class="foot">
+      <span>Built with Flask + yt-dlp</span>
+      <span class="dot">•</span>
+      <span>For personal use — respect copyright and YouTube's Terms of Service.</span>
+    </footer>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
