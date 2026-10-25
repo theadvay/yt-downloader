@@ -32,14 +32,16 @@ ALLOWED_HOSTS = {
 }
 
 # Map the friendly quality labels used by the UI to yt-dlp format strings.
+# Each entry ends in a bare "best" fallback so a source with unusual or
+# missing format metadata still downloads instead of erroring out.
 QUALITY_FORMATS = {
     "best": "bestvideo*+bestaudio/best",
-    "2160": "bestvideo[height<=2160]+bestaudio/best[height<=2160]",
-    "1440": "bestvideo[height<=1440]+bestaudio/best[height<=1440]",
-    "1080": "bestvideo[height<=1080]+bestaudio/best[height<=1080]",
-    "720": "bestvideo[height<=720]+bestaudio/best[height<=720]",
-    "480": "bestvideo[height<=480]+bestaudio/best[height<=480]",
-    "360": "bestvideo[height<=360]+bestaudio/best[height<=360]",
+    "2160": "bestvideo[height<=2160]+bestaudio/best[height<=2160]/best",
+    "1440": "bestvideo[height<=1440]+bestaudio/best[height<=1440]/best",
+    "1080": "bestvideo[height<=1080]+bestaudio/best[height<=1080]/best",
+    "720": "bestvideo[height<=720]+bestaudio/best[height<=720]/best",
+    "480": "bestvideo[height<=480]+bestaudio/best[height<=480]/best",
+    "360": "bestvideo[height<=360]+bestaudio/best[height<=360]/best",
 }
 
 _ANSI = re.compile(r"\x1b\[[0-9;]*m")

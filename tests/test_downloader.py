@@ -72,6 +72,15 @@ def test_validate_url_rejects_others(url):
         validate_url(url)
 
 
+# --- Format selection -----------------------------------------------------
+
+@pytest.mark.parametrize("quality", list(downloader.QUALITY_FORMATS))
+def test_every_quality_has_a_best_fallback(quality):
+    """A quality must never hard-fail on a source with odd/missing metadata."""
+    fmt = downloader.QUALITY_FORMATS[quality]
+    assert fmt.split("/")[-1] == "best", fmt
+
+
 # --- Metadata -------------------------------------------------------------
 
 def test_get_info_fields():
