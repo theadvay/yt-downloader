@@ -22,7 +22,15 @@ from flask import (
     send_file,
 )
 
-from downloader import DownloadError, cleanup, download, ffmpeg_available, get_info
+from downloader import (
+    DownloadError,
+    cleanup,
+    download,
+    ffmpeg_available,
+    get_info,
+    js_runtime_available,
+    yt_dlp_version,
+)
 
 app = Flask(__name__)
 
@@ -38,7 +46,14 @@ def index():
 
 @app.get("/api/health")
 def health():
-    return jsonify({"ok": True, "ffmpeg": ffmpeg_available()})
+    return jsonify(
+        {
+            "ok": True,
+            "ffmpeg": ffmpeg_available(),
+            "js_runtime": js_runtime_available(),
+            "yt_dlp": yt_dlp_version(),
+        }
+    )
 
 
 @app.post("/api/info")

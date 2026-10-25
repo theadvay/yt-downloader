@@ -1,2 +1,7 @@
 Flask>=3.0
-yt-dlp>=2025.1.1
+
+# The [default] extra ships the EJS challenge-solver scripts (yt-dlp-ejs) and
+# [deno] installs a Deno runtime as a Python package. Both are REQUIRED for
+# YouTube since yt-dlp 2025.11.12, which needs an external JS runtime to solve
+# YouTube's JavaScript challenges. Plain "yt-dlp" is not enough any more.
+yt-dlp[default,deno]>=2025.11.12

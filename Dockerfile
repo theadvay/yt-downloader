@@ -8,6 +8,9 @@ RUN apt-get update \
 
 WORKDIR /app
 
+# requirements.txt pulls yt-dlp[default,deno]: that installs the EJS
+# challenge-solver scripts AND a Deno runtime. yt-dlp needs an external JS
+# runtime for YouTube since v2025.11.12 — without it, extraction fails.
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 

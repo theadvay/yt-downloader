@@ -11,6 +11,7 @@ from __future__ import annotations
 import os
 import re
 import shutil
+import subprocess
 import tempfile
 from dataclasses import dataclass
 from typing import Optional
@@ -70,8 +71,55 @@ def ffmpeg_available() -> bool:
     return shutil.which("ffmpeg") is not None
 
 
+def js_runtime_available() -> bool:
+    """True when yt-dlp can find a *supported* external JavaScript runtime.
+
+    Since yt-dlp 2025.11.12 an external JS runtime is required for full
+    YouTube support: it solves YouTube's JS challenges. Deno (>= 2.3) is
+    enabled by default; Node only counts from v22 up.
+    """
+    if any(shutil.which(exe) for exe in ("deno", "bun", "qjs", "quickjs")):
+        return True
+
+    node = shutil.which("node")
+    if node:
+        try:
+            out = subprocess.run(
+                [node, "--version"], capture_output=True, text=True, timeout=5
+            ).stdout.strip()
+            return int(out.lstrip("v").split(".")[0]) >= 22
+        except Exception:
+            return False
+    return False
+
+
+def yt_dlp_version() -> str:
+    """The installed yt-dlp version, for diagnostics."""
+    return getattr(yt_dlp.version, "__version__", "unknown")
+
+
+# Error substrings -> a short, actionable hint shown to the user.
+_HINTS = (
+    (
+        ("sign in to confirm", "not a bot", "login_required"),
+        "YouTube is treating this server's IP as a bot. Set the YTDLP_COOKIES "
+        "env var to a cookies.txt file (see README).",
+    ),
+    (
+        ("failed to extract any player response", "unable to extract initial player"),
+        "YouTube extraction failed — usually an outdated yt-dlp or a blocked "
+        "datacenter IP. Rebuild to pick up the latest yt-dlp, and/or supply cookies.",
+    ),
+    (
+        ("no supported javascript runtime", "javascript runtime"),
+        "yt-dlp needs an external JS runtime (Deno or Node 22+). The Docker "
+        "image installs one via 'yt-dlp[default,deno]'.",
+    ),
+)
+
+
 def _clean_error(exc: Exception) -> str:
-    """Turn a noisy yt-dlp traceback into one readable sentence."""
+    """Turn a noisy yt-dlp traceback into one readable sentence + hint."""
     msg = _ANSI.sub("", str(exc)).strip()
     for prefix in ("ERROR: ", "WARNING: "):
         if msg.startswith(prefix):
@@ -79,8 +127,13 @@ def _clean_error(exc: Exception) -> str:
     msg = msg.splitlines()[0].strip() if msg else ""
     # Drop the trailing "See https://..." help links yt-dlp appends.
     msg = re.split(r"\s*See\s+https?://", msg)[0].strip()
-    if len(msg) > 240:
-        msg = msg[:237].rstrip() + "..."
+    if len(msg) > 200:
+        msg = msg[:197].rstrip() + "..."
+
+    low = msg.lower()
+    for keys, hint in _HINTS:
+        if any(k in low for k in keys):
+            return f"{msg} — {hint}" if msg else hint
     return msg or "Could not process this link."
 
 
