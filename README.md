@@ -3,8 +3,6 @@
 Paste a YouTube link, pick a quality, download. A small Flask web app powered by
 [yt-dlp](https://github.com/yt-dlp/yt-dlp).
 
-<img src="docs/screenshot.png" alt="yt-downloader" width="620">
-
 ## Run it
 
 Needs **Python 3.10+**.
